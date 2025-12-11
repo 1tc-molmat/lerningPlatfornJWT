@@ -6,9 +6,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+use Tymon\JWTAuth\Contracts\JWTSubject; // <-- Ezt importáld
+
+class User extends Authenticatable implements JWTSubject // <-- Ezt implementáld
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -39,9 +40,10 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Enrollment::class);
     }
+
     public function courses()
     {
-        return $this->hasMany(Course::class, 'instructor_id');
+        return $this->belongsToMany(Course::class, 'enrollments');
     }
 
     public function isAdmin()
@@ -49,14 +51,24 @@ class User extends Authenticatable implements JWTSubject
         return $this->role === 'admin';
     }
 
-    //jwt miatt 
+    // ... A többi tulajdonság változatlan
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     * @return mixed
+     */
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     * @return array
+     */
     public function getJWTCustomClaims()
     {
+        // Ide adhatsz hozzá extra információt a token payload-hoz
         return [];
     }
 }
